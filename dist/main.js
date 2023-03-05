@@ -23,6 +23,12 @@ $("#Ingredient-search-button").on("click", function () {
     }
   );
 });
+$("#pagination").on("click", function () {
+  let next = $(this).siblings("#ingredientInputField").val();
+  $.get(`/recipe/:nextPage${next}`).then((data) => {
+    render(data);
+  });
+});
 
 $(".recipe-album-container").on("click", "img", function () {
   let firstIngredint = $(this)

@@ -44,6 +44,67 @@ const URL =
   "https://recipes-goodness-elevation.herokuapp.com/recipes/ingredient";
 let allOfingredients = [];
 let filteredRecepice = [];
+app.get(`/recipe/:YOUR_INGREDIENT`, function (req, res) {
+  filteredRecepice = [];
+  allOfingredients = [];
+  let ingredient = req.params.YOUR_INGREDIENT;
+  let dairy = req.query.dairy;
+  let gluten = req.query.gluten;
+  let page = req.query.page;
+  let limit = req.query.limit;
+  if (!page) {
+    page = 1;
+  }
+  if (!limit) {
+    limit = 4;
+  }
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  axios.get(`${URL}/${ingredient}`).then((recipes) => {
+    const results = {};
+    if (endIndex < recipes.data.results) {
+      results.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+    results.results = recipes.data.results.slice(startIndex, endIndex);
+    results.results.map((e) => {
+      let recipe = {
+        idMeal: e.idMeal,
+        ingredients: e.ingredients,
+        title: e.title,
+        thumbnail: e.thumbnail,
+        href: e.href,
+      };
+      allOfingredients.push(recipe);
+    });
+    results.results = [];
+    results.results = allOfingredients;
+    if (dairy == 0 && gluten == 1) {
+      filteredRecepice = filterRecipe(allOfingredients, glutenIngredients);
+      res.send(filteredRecepice);
+      return;
+    }
+    if (dairy == 1 && gluten == 0) {
+      filteredRecepice = filterRecipe(allOfingredients, dairyIngredients);
+      res.send(filteredRecepice);
+      return;
+    }
+    if (dairy == 1 && gluten == 1) {
+      filteredRecepice = filterRecipe(allOfingredients, glutenIngredients);
+      let extraFilteredRecepice = filterRecipe(
+        filteredRecepice,
+        dairyIngredients
+      );
+      res.send(extraFilteredRecepice);
+      return;
+    } else {
+      res.send(allOfingredients);
+      return;
+    }
+  });
+});
 
 app.get(`/recipe/:YOUR_INGREDIENT`, function (req, res) {
   filteredRecepice = [];
@@ -51,9 +112,8 @@ app.get(`/recipe/:YOUR_INGREDIENT`, function (req, res) {
   let ingredient = req.params.YOUR_INGREDIENT;
   let dairy = req.query.dairy;
   let gluten = req.query.gluten;
-  console.log(dairy);
-  console.log(gluten);
-  axios.get(`${URL}/${ingredient}`).then((recipes) => {
+
+  axios.get(`${URL}/${nextPage}`).then((recipes) => {
     recipes.data.results.map((e) => {
       let recipe = {
         idMeal: e.idMeal,
@@ -64,6 +124,7 @@ app.get(`/recipe/:YOUR_INGREDIENT`, function (req, res) {
       };
       allOfingredients.push(recipe);
     });
+
     if (dairy == 0 && gluten == 1) {
       filteredRecepice = filterRecipe(allOfingredients, glutenIngredients);
       res.send(filteredRecepice);

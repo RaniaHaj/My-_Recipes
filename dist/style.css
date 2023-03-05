@@ -26,6 +26,11 @@ body {
   width: 8%;
 }
 
+.pagination {
+  margin: 0.9% 1%;
+  width: 8%;
+}
+
 .recipe-album-container {
   grid-area: ic;
   display: grid;
